@@ -14,7 +14,7 @@ proc default(a: string, b: string): string =
 proc convertCsv*(inFile: string, outFile: string, lang: string): int =
     echo &"Converting CSV file '{inFile}' to into JSON file '{outFile}'."
     echo &"language: {lang}"
-    var resultJson = parseJson "{}"
+    var resultJson = %*{}
 
     if not inFile.fileExists:
         echo &"Error: File '{inFile}' does not exist."
@@ -32,7 +32,7 @@ proc convertCsv*(inFile: string, outFile: string, lang: string): int =
     parser.open inFile
     parser.readHeaderRow
 
-    while parser.readRow():
+    while parser.readRow:
         var tableKey = ""
         for col in parser.headers:
             # Set the table key name.
@@ -41,7 +41,7 @@ proc convertCsv*(inFile: string, outFile: string, lang: string): int =
                 continue
             # Assign the key in the table.
             if col == lang:
-                resultJson[tableKey] = %*parser.rowEntry(col)
+                resultJson[tableKey] = %*parser.rowEntry col
                 break
 
     echo "Finished parsing file."

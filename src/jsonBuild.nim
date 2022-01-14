@@ -51,4 +51,3 @@ proc buildJson*(inFile: string, outFile: string): int =
     
     writeFile outFile, resultJson.pretty
     0
-

@@ -5,6 +5,8 @@ import std/tables
 import std/json
 import std/os
 
+import stringRemover
+
 # Add all of b's keys to a. b will not overwrite a by default.
 # Setting param keep to false will enable overwriting though.
 proc merge(a: var JsonNode, b: JsonNode, keep = true): JsonNode =
@@ -57,6 +59,13 @@ proc langReplace*(
         translationsScanned += 1
         let str = inputJson[key].getStr
         var modString = ""
+
+        # Remove stuff inside {}'s, to avoid translating them and breaking stuff.
+        let
+            removeResult = str.removeInside('{', '}')
+            alteredString = removeResult[0]
+            removals = removeResult[1]
+
         for r in replaceKeys:
             # Check for replaceable stuff. This does not check for
             # replaceable stuff on the modified string, so the order
@@ -64,11 +73,16 @@ proc langReplace*(
             if str.contains r:
                 # Save on some memory if no strings match.
                 if modString == "":
-                    modString = str
+                    modString = alteredString
                 modString = modString.replace(r, replaceMap[r])
 
-        # Add the key to the result.
         if modString != "":
+            echo '\n', modString
+            modString = modString.replaceStuff('{', '}', removals)
+            echo modString
+
+        # Add the key to the result.
+        if modString != "" and modString != str:
             resultJson[key] = %*modString
 
         # Make a progress showing thingy
