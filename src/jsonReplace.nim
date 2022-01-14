@@ -76,6 +76,8 @@ proc langReplace*(
                     modString = alteredString
                 modString = modString.replace(r, replaceMap[r])
 
+        modString = modString.replaceStuff('{', '}', removals)
+
         # Add the key to the result.
         if modString != "" and modString != str:
             resultJson[key] = %*modString
@@ -85,7 +87,6 @@ proc langReplace*(
         stdout.write &"\x1b[2K{translationsScanned} / {numItems} ({percentDone}%) translations scanned.\r"
 
     echo &"\nFinished, created {resultJson.len} replaced names."
-
     echo &"Writing to file \"{outFile}\"."
 
     # Join to an existing file.
