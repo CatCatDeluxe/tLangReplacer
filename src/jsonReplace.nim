@@ -76,11 +76,6 @@ proc langReplace*(
                     modString = alteredString
                 modString = modString.replace(r, replaceMap[r])
 
-        if modString != "":
-            echo '\n', modString
-            modString = modString.replaceStuff('{', '}', removals)
-            echo modString
-
         # Add the key to the result.
         if modString != "" and modString != str:
             resultJson[key] = %*modString
