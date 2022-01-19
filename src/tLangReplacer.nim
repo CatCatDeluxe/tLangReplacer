@@ -4,6 +4,7 @@ import argparse
 import jsonReplace
 import csvConvert
 import jsonBuild
+import jsonFlatten
 
 when isMainModule:
     var parser = newParser:
@@ -42,12 +43,20 @@ when isMainModule:
             help """
 Make an intermediate JSON file into the Terraria language pack format.
 Remember, the format for pack names is <language, e.g en-US>[rest of filename].json""".strip
-            arg("infile", default = some "int.json")
-            arg("outfile")
+            arg "infile", default = some "int.json"
+            arg "outfile"
             run:
                 let exitCode = buildJson(
                     opts.inFile,
                     opts.outFile)
                 quit exitCode
+        
+        command "flatten":
+            help """
+Flatten a nested JSON file into an intermediate file.""".strip
+            arg "infile"
+            arg "outfile", default = some "int.json"
+            run:
+                quit flattenJson(opts.inFile, opts.outFile)
 
     parser.run commandLineParams()

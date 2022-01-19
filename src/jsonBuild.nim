@@ -1,8 +1,8 @@
 from std/strformat import `&`
 import std/strutils
-import std/rdstdin
 import std/json
-import std/os
+
+import fileCheck
 
 proc idxOfLast(str: string, match: char): int =
     for i in countdown(str.len - 1, 0):
@@ -11,16 +11,10 @@ proc idxOfLast(str: string, match: char): int =
     0
 
 proc buildJson*(inFile: string, outFile: string): int =
-    if not inFile.fileExists:
-        echo "Error: file \"{inFile}\" does not exist."
+    if not inFile.ensureFile:
         return 1
-
-    if outFile.fileExists:
-        echo &"\x1b[33mWarning: Output file \"{outFile}\" already exists.\x1b[0m"
-        let response = readLineFromStdin("Overwrite file? [y/N] ").toLower
-        if response != "y":
-            return 0
-        echo "Continuing with doing stuff..."
+    if not outFile.warnIfFile:
+        return 0
 
     echo &"Reading file \"{inFile}\"..."
     let inputJson = parseFile inFile

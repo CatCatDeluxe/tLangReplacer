@@ -1,10 +1,8 @@
 from std/strformat import `&`
-import std/unicode
 import std/parsecsv
 import std/json
-import std/strutils
-import std/rdstdin
-import std/os
+
+import fileCheck
 
 proc default(a: string, b: string): string =
     if a == "":
@@ -16,16 +14,10 @@ proc convertCsv*(inFile: string, outFile: string, lang: string): int =
     echo &"language: {lang}"
     var resultJson = %*{}
 
-    if not inFile.fileExists:
-        echo &"Error: File '{inFile}' does not exist."
+    if not inFile.ensureFile:
         return 1
-
-    if outFile.fileExists:
-        echo &"\x1b[33mWarning: Output file \"{outFile}\" already exists.\x1b[0m"
-        let response = readLineFromStdin("Overwrite file? [y/N] ").default("n").toLower
-        if response != "y":
-            return 0
-        echo "Continuing with doing stuff..."
+    if not outFile.warnIfFile:
+        return 0
 
     var parser: CsvParser
     echo "Opening and parsing file..."

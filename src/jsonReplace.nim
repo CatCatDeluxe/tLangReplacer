@@ -6,6 +6,7 @@ import std/json
 import std/os
 
 import stringRemover
+import fileCheck
 
 # Add all of b's keys to a. b will not overwrite a by default.
 # Setting param keep to false will enable overwriting though.
@@ -25,8 +26,7 @@ proc langReplace*(
         joinFile = true,
         keepOld = true): int =
 
-    if not inFile.fileExists:
-        echo &"Error File \"{infile}\" does not exist."
+    if not inFile.ensureFile:
         return 1
 
     var replaceMap = initTable[string, string]()
