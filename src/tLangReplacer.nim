@@ -47,8 +47,8 @@ Remember, the format for pack names is <language, e.g en-US>[rest of filename].j
             arg "outfile"
             run:
                 let exitCode = buildJson(
-                    opts.inFile,
-                    opts.outFile)
+                    inFile = opts.inFile,
+                    outFile = opts.outFile)
                 quit exitCode
         
         command "flatten":
@@ -57,6 +57,7 @@ Flatten a nested JSON file into an intermediate file.""".strip
             arg "infile"
             arg "outfile", default = some "int.json"
             run:
-                quit flattenJson(opts.inFile, opts.outFile)
+                let exitCode = flattenJsonFile(opts.inFile, opts.outFile)
+                quit exitCode
 
     parser.run commandLineParams()
