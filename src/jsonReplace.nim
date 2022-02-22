@@ -20,8 +20,7 @@ proc merge(a: var JsonNode, b: JsonNode, keep = true): JsonNode =
         result[key] = b[key]
 
 proc langReplace*(
-        inFile: string,
-        outFile: string,
+        inFile, outFile: string,
         replaces: seq[string],
         joinFile = true,
         keepOld = true): int =
@@ -56,7 +55,7 @@ proc langReplace*(
     var translationsScanned = 0
     # Actually do stuff
     for key in inputJson.keys:
-        translationsScanned += 1
+        inc translationsScanned
         let str = inputJson[key].getStr
         var modString = ""
 
@@ -93,7 +92,7 @@ proc langReplace*(
     if outFile.fileExists and joinFile:
         echo "File already exists, merging files..."
         let origJson = parseFile outFile
-        resultJson = merge(resultJson, origJson, not keepOld)
+        resultJson = resultJson.merge(origJson, not keepOld)
 
     writeFile outFile, resultJson.pretty
     echo "Write complete."

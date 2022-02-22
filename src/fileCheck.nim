@@ -7,7 +7,7 @@ proc ensureFile*(filename: string): bool =
     if not filename.fileExists:
         echo &"\x1b[31;1mError: File \"{filename}\" does not exist.\x1b[0m"
         return false
-    return true
+    true
 
 proc warnIfFile*(filename: string): bool =
     if filename.fileExists:

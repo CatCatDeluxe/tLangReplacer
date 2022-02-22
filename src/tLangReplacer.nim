@@ -9,12 +9,11 @@ import jsonFlatten
 when isMainModule:
     var parser = newParser:
         command "conv":
-            help(
-                "Convert a multi-language CSV file to a base intermediate " &
-                "language pack JSON file.")
-            option("-l", "--language", default = some "en-US")
-            arg("fromFile")
-            arg("toFile", default = some "base.json")
+            help "Convert a multi-language CSV file to a base intermediate " &
+                "language pack JSON file."
+            option "-l", "--language", default = some "en-US" 
+            arg "fromFile" 
+            arg "toFile", default = some "base.json" 
             run:
                 let exitCode = convertCsv(
                     opts.fromFile,
@@ -24,13 +23,19 @@ when isMainModule:
 
         command "replace":
             help "Replace one string with another one."
-            option("-i", "--infile", default = some "base.json")
-            option("-o", "--outfile", default = some "int.json")
-            flag("-O", "--overwrite")
-            flag("-r", "--replace",
-                help = "Whether to allow replacing translations already in the output file.")
-            arg("replaces", nargs = -1)
+            option "-i", "--infile", default = some "base.json" 
+            option "-o", "--outfile", default = some "int.json" 
+            flag "-O", "--overwrite" 
+            flag "-r", "--replace",
+                help = "Whether to allow replacing translations already in the output file."
+            flag "-c", "--cyclic",
+                help = "Enables replacing text in the out file and sets the in file to the out file."
+            arg "replaces", nargs = -1
             run:
+                if opts.cyclic:
+                    opts.inFile = opts.outfile
+                    opts.replace = true
+
                 let exitCode = langReplace(
                     opts.inFile,
                     opts.outFile,

@@ -13,7 +13,7 @@ proc flattenTo(node: JsonNode, outNode: var JsonNode, path = ""): void =
             continue
         outNode[realPath & child.key] = child.val
 
-proc flattenJsonFile*(inFile: string, outFile: string): int =
+proc flattenJsonFile*(inFile, outFile: string): int =
     if not inFile.ensureFile:
         return 1
     if not outFile.warnIfFile:

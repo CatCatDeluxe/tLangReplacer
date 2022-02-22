@@ -4,12 +4,7 @@ import std/json
 
 import fileCheck
 
-proc default(a: string, b: string): string =
-    if a == "":
-        return b
-    a
-
-proc convertCsv*(inFile: string, outFile: string, lang: string): int =
+proc convertCsv*(inFile, outFile, lang: string): int =
     echo &"Converting CSV file '{inFile}' to into JSON file '{outFile}'."
     echo &"language: {lang}"
     var resultJson = %*{}

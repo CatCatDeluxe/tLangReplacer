@@ -1,11 +1,11 @@
-proc removeInside*(str: string, beginChar: char, endChar: char): (string, seq[string]) =
+proc removeInside*(str: string, beginChar, endChar: char): (string, seq[string]) =
     var resultString = ""
     var removed: seq[string] = @[]
 
     var depth = 0
     for ch in str:
         if ch == beginChar:
-            depth += 1
+            inc depth
             if depth == 1:
                 removed.add ""
                 resultString.add beginChar & endChar
@@ -23,7 +23,7 @@ proc removeInside*(str: string, beginChar: char, endChar: char): (string, seq[st
     (resultString, removed)
 
 # I can't think of a better name for this function, so it's called this now I guess
-proc replaceStuff*(str: string, beginChar: char, endChar: char,
+proc replaceStuff*(str: string, beginChar, endChar: char,
         extractedStrings: seq[string]): string =
     result = ""
 
@@ -33,15 +33,15 @@ proc replaceStuff*(str: string, beginChar: char, endChar: char,
     for ch in str:
         if skipNext:
             skipNext = false
-            idx += 1
+            inc idx
             continue
 
         if idx < str.len and ch == beginChar and str[idx + 1] == endChar:
             result.add extractedStrings[extractedIdx]
-            extractedIdx += 1
-            idx += 1
+            inc extractedIdx
+            inc idx
             skipNext = true
             continue
 
         result.add ch
-        idx += 1
+        inc idx

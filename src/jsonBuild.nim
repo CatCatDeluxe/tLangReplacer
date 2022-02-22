@@ -10,7 +10,7 @@ proc idxOfLast(str: string, match: char): int =
             return i
     0
 
-proc buildJson*(inFile: string, outFile: string): int =
+proc buildJson*(inFile, outFile: string): int =
     if not inFile.ensureFile:
         return 1
     if not outFile.warnIfFile:
