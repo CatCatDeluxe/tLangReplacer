@@ -25,6 +25,7 @@ when isMainModule:
             help "Replace one string with another one."
             option "-i", "--infile", default = some "base.json" 
             option "-o", "--outfile", default = some "int.json" 
+            flag "-I", "--ignore-case", help = "Ignore upper and lower case when matching patterns."
             flag "-O", "--overwrite" 
             flag "-r", "--replace",
                 help = "Whether to allow replacing translations already in the output file."
@@ -41,7 +42,8 @@ when isMainModule:
                     opts.outFile,
                     opts.replaces,
                     joinFile = not opts.overwrite,
-                    keepOld = not opts.replace)
+                    keepOld = not opts.replace,
+                    ignoreCase = opts.ignoreCase)
                 quit exitCode
 
         command "build":

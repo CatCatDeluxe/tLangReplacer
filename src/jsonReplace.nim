@@ -1,16 +1,17 @@
 from std/strformat import `&`
 from math import floor
-import std/strutils
-import std/tables
-import std/json
-import std/os
+import std/[strutils, json, os, re]
 
 import stringRemover
 import fileCheck
 
-# Add all of b's keys to a. b will not overwrite a by default.
-# Setting param keep to false will enable overwriting though.
+type RegexReplace = object
+    rgx: re.Regex
+    replace: string
+
 proc merge(a: var JsonNode, b: JsonNode, keep = true): JsonNode =
+    ## Add all of b's keys to a. b will not overwrite a by default.
+    ## Setting param keep to false will enable overwriting though.
     result = %*{}
     for key in a.keys:
         result[key] = a[key]
@@ -23,29 +24,37 @@ proc langReplace*(
         inFile, outFile: string,
         replaces: seq[string],
         joinFile = true,
-        keepOld = true): int =
+        keepOld = true,
+        ignoreCase = false): int =
 
     if not inFile.ensureFile:
         return 1
 
-    var replaceMap = initTable[string, string]()
-    # This is to avoid calling replaceMap.keys a lot.
-    var replaceKeys: seq[string] = @[]
+    var regexes: seq[RegexReplace] = @[]
 
     # Construct the replace map.
     block:
-        var keyName = ""
-        for str in replaces:
-            if keyName == "":
-                keyName = str
-                replaceKeys.add str
+        var regexesIndex = 0
+        for i, str2 in replaces:
+            var str = str2
+
+            # Add the actual regex.
+            if i mod 2 == 0:
+                # Make the regex case insensitive.
+                if ignoreCase:
+                    str = "(?i)" & str
+                # Convert the string to a regex and add it to the seq.
+                regexes.add RegexReplace(rgx: str.re)
                 continue
-            replaceMap[keyName] = str
-            keyName = ""
+
+            # Add the string to replace.
+            regexes[regexesIndex].replace = str
+            inc regexesIndex
 
     echo "Reading and parsing JSON file..."
-    let inputJson = parseFile inFile
-    let numItems = inputJson.len
+    let
+        inputJson = parseFile inFile
+        numItems = inputJson.len
     echo "Done parsing file."
 
     var resultJson: JsonNode = %*{}
@@ -56,28 +65,20 @@ proc langReplace*(
     # Actually do stuff
     for key in inputJson.keys:
         inc translationsScanned
-        let str = inputJson[key].getStr
-        var modString = ""
 
         # Remove stuff inside {}'s, to avoid translating them and breaking stuff.
         let
+            str: string = inputJson[key].getStr
             removeResult = str.removeInside('{', '}')
-            alteredString = removeResult[0]
-            removals = removeResult[1]
+            removals: seq[string] = removeResult[1]
+        var modString: string = removeResult[0]
 
-        for r in replaceKeys:
-            # Check for replaceable stuff. This does not check for
-            # replaceable stuff on the modified string, so the order
-            # of the replace things probably doesn't matter
-            if str.contains r:
-                # Save on some memory if no strings match.
-                if modString == "":
-                    modString = alteredString
-                modString = modString.replace(r, replaceMap[r])
+        for r in regexes:
+            modString = modString.replace(r.rgx, r.replace)
 
         modString = modString.replaceStuff('{', '}', removals)
 
-        # Add the key to the result.
+        # Add the key to the result, only if it is modified and not empty
         if modString != "" and modString != str:
             resultJson[key] = %*modString
 
@@ -91,7 +92,7 @@ proc langReplace*(
     # Join to an existing file.
     if outFile.fileExists and joinFile:
         echo "File already exists, merging files..."
-        let origJson = parseFile outFile
+        let origJson: JsonNode = parseFile outFile
         resultJson = resultJson.merge(origJson, not keepOld)
 
     writeFile outFile, resultJson.pretty
